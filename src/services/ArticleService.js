@@ -14,11 +14,6 @@ const api = axios.create({
     Accept: "application/json",
     "X-Requested-With": "XMLHttpRequest",
   },
-  // Add these options for CORS
-  crossDomain: true,
-  xhrFields: {
-    withCredentials: true,
-  },
 });
 
 // Add auth token to requests
@@ -73,11 +68,6 @@ export const fetchArticles = async () => {
 
     const response = await api.get("/", {
       withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      },
     });
     console.log("Articles response:", response.data);
     return response.data;
