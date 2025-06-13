@@ -54,21 +54,23 @@ const UsersPage = () => {
 
   useEffect(() => {
     const userType = localStorage.getItem("type");
-    if (userType !== "admin") {
-      navigate("/dashboard");
+    if (!userType) {
+      navigate("/login");
+    } else if (userType !== "admin") {
+      setError("You don't have permission to access this page");
+    } else {
+      loadUsers();
     }
   }, [navigate]);
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   const loadUsers = async () => {
     try {
       const usersData = await fetchUsers();
-      setUsers(usersData.data);
+      setUsers(Array.isArray(usersData) ? usersData : []);
     } catch (err) {
+      console.error("Error loading users:", err);
       setError("Failed to load users");
+      setUsers([]);
     }
   };
 

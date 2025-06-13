@@ -20,7 +20,15 @@ API.interceptors.request.use((config) => {
 });
 
 // Fetch users
-export const fetchUsers = () => API.get("/");
+export const fetchUsers = async () => {
+  try {
+    const response = await API.get("/users");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+};
 
 // Create user
 export const createUser = (user) => API.post("/", user);

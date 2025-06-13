@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import articles from "../../article-content";
+import { getArticle } from "../../services/ArticleService";
 import "../../styles/ArticlesPage.css";
+import constants from "../../../constants";
 
 function ArticlePage() {
   const { id } = useParams();
-  const article = articles.find((article) => article.id === parseInt(id));
+  const [article, setArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!article) {
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        const data = await getArticle(id);
+        setArticle(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticle();
+  }, [id]);
+
+  if (loading) {
+    return <div className="article-loading">Loading...</div>;
+  }
+
+  if (error || !article) {
     return (
       <div className="article-not-found">
         <h1>Article not found</h1>
@@ -18,12 +40,22 @@ function ArticlePage() {
     );
   }
 
+  // Split content into paragraphs by newlines
+  const paragraphs = article.content.split("\n").filter((p) => p.trim());
+
+  // Handle image URL
+  const imageUrl = article.image
+    ? article.image.startsWith("/uploads/")
+      ? `${constants.HOST.replace("/api", "")}${article.image}`
+      : article.image
+    : "/default-article-image.jpg";
+
   return (
     <div className="article-detail-container">
       <div className="article-detail">
         <div className="article-hero">
           <img
-            src={article.image}
+            src={imageUrl}
             alt={article.title}
             className="article-hero-image"
           />
@@ -35,7 +67,7 @@ function ArticlePage() {
         </div>
 
         <div className="article-body">
-          {article.content.map((paragraph, index) => (
+          {paragraphs.map((paragraph, index) => (
             <p key={index} className="article-paragraph">
               {paragraph}
             </p>
@@ -47,7 +79,7 @@ function ArticlePage() {
             ← All Articles
           </Link>
           <span className="article-date">
-            Last updated: {new Date().toLocaleDateString()}
+            Last updated: {new Date(article.updatedAt).toLocaleDateString()}
           </span>
         </div>
       </div>

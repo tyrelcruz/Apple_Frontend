@@ -1,5 +1,6 @@
 import axios from "axios";
 import constants from "../../constants";
+import { uploadImageToImgBB } from "../utils/imageUpload";
 
 const baseURL = import.meta.env.VITE_API_URL + "/api/articles";
 
@@ -82,63 +83,53 @@ export const fetchArticles = async () => {
   }
 };
 
-// Rest of your code remains the same...
-
 // Create article
 export const createArticle = async (article) => {
   try {
-    const formData = new FormData();
+    let articleData = { ...article };
 
-    // Append all article fields to formData
-    Object.keys(article).forEach((key) => {
-      if (key === "image" && article[key] instanceof File) {
-        formData.append("image", article[key]);
-      } else if (key !== "image") {
-        // Don't append image if it's not a File
-        formData.append(key, article[key]);
-      }
-    });
+    // If there's an image file, upload it to ImgBB first
+    if (article.image instanceof File) {
+      const imageUrl = await uploadImageToImgBB(article.image);
+      articleData.image = imageUrl;
+    }
 
-    const response = await api.post("/", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await api.post("/", articleData);
     return response.data;
   } catch (error) {
     console.error("Error creating article:", error);
-    throw new Error(
-      error.response?.data?.message || "Failed to create article"
-    );
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    } else {
+      throw new Error("Failed to create article. Please try again.");
+    }
   }
 };
 
 // Update article
 export const updateArticle = async (id, article) => {
   try {
-    const formData = new FormData();
+    let articleData = { ...article };
 
-    // Append all article fields to formData
-    Object.keys(article).forEach((key) => {
-      if (key === "image" && article[key] instanceof File) {
-        formData.append("image", article[key]);
-      } else if (key !== "image") {
-        // Don't append image if it's not a File
-        formData.append(key, article[key]);
-      }
-    });
+    // If there's an image file, upload it to ImgBB first
+    if (article.image instanceof File) {
+      const imageUrl = await uploadImageToImgBB(article.image);
+      articleData.image = imageUrl;
+    }
 
-    const response = await api.put(`/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await api.put(`/${id}`, articleData);
     return response.data;
   } catch (error) {
     console.error("Error updating article:", error);
-    throw new Error(
-      error.response?.data?.message || "Failed to update article"
-    );
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    } else {
+      throw new Error("Failed to update article. Please try again.");
+    }
   }
 };
 

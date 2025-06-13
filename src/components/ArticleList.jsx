@@ -4,7 +4,6 @@ import "../styles/ArticleList.css";
 import constants from "../../constants";
 
 function ArticleList({ articles = [] }) {
-  // Only show published articles
   const publishedArticles = (articles || []).filter(
     (article) => article?.status === "published"
   );

@@ -5,7 +5,6 @@ import {
   updateArticle,
   deleteArticle,
 } from "../../services/ArticleService";
-import constants from "../../../constants";
 import {
   Table,
   TableBody,
@@ -28,7 +27,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 import Footer from "../../components/Footer";
 import "../../styles/ArticleList.css";
 
@@ -59,10 +65,17 @@ function DashArticleListPage() {
     setLoading(true);
     try {
       const data = await fetchArticles();
-      setArticles(data || []);
+      console.log("Loaded articles:", data);
+      if (Array.isArray(data)) {
+        setArticles(data);
+      } else {
+        console.error("Received non-array data:", data);
+        setArticles([]);
+      }
     } catch (err) {
       console.error("Error loading articles:", err);
       setError("Failed to load articles");
+      setArticles([]);
     } finally {
       setLoading(false);
     }
@@ -79,7 +92,7 @@ function DashArticleListPage() {
     setEditing(true);
     setOpen(true);
     if (article.image) {
-      setPreviewUrl(`${constants.HOST.replace("/api", "")}${article.image}`);
+      setPreviewUrl(article.image);
     }
   };
 
@@ -114,28 +127,45 @@ function DashArticleListPage() {
         return;
       }
 
+      // Validate required fields
+      if (!currentArticle.title?.trim()) {
+        setError("Title is required");
+        return;
+      }
+      if (!currentArticle.content?.trim()) {
+        setError("Content is required");
+        return;
+      }
+      if (!currentArticle.category?.trim()) {
+        setError("Category is required");
+        return;
+      }
+
       const userId = localStorage.getItem("userId");
       console.log("userId from localStorage:", userId);
 
       const articleData = {
-        title: currentArticle.title,
-        content: currentArticle.content,
-        category: currentArticle.category,
+        title: currentArticle.title.trim(),
+        content: currentArticle.content.trim(),
+        category: currentArticle.category.trim(),
         status: currentArticle.status,
         author: userId,
       };
-      if (currentArticle.image instanceof File) {
+
+      // Include image if it exists
+      if (currentArticle.image) {
         articleData.image = currentArticle.image;
       }
-      console.log("articleData to send:", articleData);
 
       if (editing) {
         await updateArticle(currentArticle._id, articleData);
       } else {
         await createArticle(articleData);
       }
+
       setOpen(false);
       setPreviewUrl("");
+      setCurrentArticle(emptyArticle);
       loadArticles();
     } catch (err) {
       console.error("Error saving article:", err);
@@ -144,23 +174,41 @@ function DashArticleListPage() {
   };
 
   return (
-    <Box className="dash-article-list-page">
-      <Button
-        onClick={handleAdd}
+    <Box className="dash-article-list-page" sx={{ p: 3 }}>
+      <Box
         sx={{
-          mb: 2,
-          background: "linear-gradient(90deg, #4cd964 0%, #5ac8fa 100%)",
-          color: "#fff",
-          borderRadius: 2,
-          fontWeight: 600,
-          textTransform: "none",
-          px: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
         }}
       >
-        Add Article
-      </Button>
-      {error && <Typography color="error">{error}</Typography>}
-      <TableContainer component={Paper} sx={{ borderRadius: 3, mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+          Article Management
+        </Typography>
+        <Button
+          onClick={handleAdd}
+          startIcon={<AddIcon />}
+          sx={{
+            background: "linear-gradient(90deg, #4cd964 0%, #5ac8fa 100%)",
+            color: "#fff",
+            borderRadius: 2,
+            fontWeight: 600,
+            textTransform: "none",
+            px: 3,
+          }}
+        >
+          Add Article
+        </Button>
+      </Box>
+
+      {error && (
+        <Typography color="error" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
+
+      <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -188,7 +236,7 @@ function DashArticleListPage() {
                   <TableCell>
                     {article.image ? (
                       <img
-                        src={`${constants.HOST.replace("/api", "")}${article.image}`}
+                        src={article.image}
                         alt={article.title}
                         style={{
                           width: "50px",
@@ -206,29 +254,52 @@ function DashArticleListPage() {
                     {article.author?.firstName || "-"}{" "}
                     {article.author?.lastName || ""}
                   </TableCell>
-                  <TableCell>{article.status}</TableCell>
+                  <TableCell>
+                    <Box
+                      sx={{
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        display: "inline-block",
+                        bgcolor:
+                          article.status === "published"
+                            ? "#4cd964"
+                            : article.status === "draft"
+                              ? "#FF9500"
+                              : "#FF2D55",
+                        color: "white",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      {article.status}
+                    </Box>
+                  </TableCell>
                   <TableCell>{article.category}</TableCell>
                   <TableCell>
                     {new Date(article.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="small"
-                      onClick={() => handleEdit(article)}
-                      sx={{ mr: 1 }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() => {
-                        setDeleteId(article._id);
-                        setDeleteDialogOpen(true);
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEdit(article)}
+                        sx={{ mr: 1 }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          setDeleteId(article._id);
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))
@@ -237,7 +308,7 @@ function DashArticleListPage() {
         </Table>
       </TableContainer>
 
-      {}
+      {/* Add/Edit Article Modal */}
       <Modal
         open={open}
         onClose={() => {
@@ -245,25 +316,38 @@ function DashArticleListPage() {
           setPreviewUrl("");
           setCurrentArticle(emptyArticle);
         }}
+        aria-labelledby="article-modal-title"
       >
         <Box
           sx={{
-            width: 360,
-            p: 3,
-            bgcolor: "#f9f9f9",
-            borderRadius: 3,
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "90%",
+            maxWidth: 800,
+            maxHeight: "90vh",
+            bgcolor: "background.paper",
+            borderRadius: 2,
             boxShadow: 24,
-            mx: "auto",
-            my: 8,
+            p: 4,
+            overflow: "auto",
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-            {editing ? "Edit Article" : "Add Article"}
+          <Typography
+            id="article-modal-title"
+            variant="h5"
+            component="h2"
+            sx={{ mb: 3, fontWeight: "bold" }}
+          >
+            {editing ? "Edit Article" : "Add New Article"}
           </Typography>
+
           <form onSubmit={handleSave}>
-            <Grid container spacing={1}>
+            <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TextField
+                  fullWidth
                   label="Title"
                   value={currentArticle.title}
                   onChange={(e) =>
@@ -272,14 +356,13 @@ function DashArticleListPage() {
                       title: e.target.value,
                     })
                   }
-                  fullWidth
-                  size="small"
-                  sx={{ mb: 1, background: "#fff" }}
                   required
                 />
               </Grid>
+
               <Grid item xs={12}>
                 <TextField
+                  fullWidth
                   label="Content"
                   value={currentArticle.content}
                   onChange={(e) =>
@@ -288,48 +371,15 @@ function DashArticleListPage() {
                       content: e.target.value,
                     })
                   }
-                  fullWidth
-                  size="small"
                   multiline
-                  minRows={3}
-                  sx={{ mb: 1, background: "#fff" }}
+                  rows={6}
                   required
                 />
               </Grid>
-              <Grid item xs={12}>
-                <input
-                  accept="image/*"
-                  type="file"
-                  id="image-upload"
-                  onChange={handleImageChange}
-                  style={{ display: "none" }}
-                />
-                <label htmlFor="image-upload">
-                  <Button
-                    variant="outlined"
-                    component="span"
-                    fullWidth
-                    sx={{ mb: 1 }}
-                  >
-                    Upload Image
-                  </Button>
-                </label>
-                {previewUrl && (
-                  <Box sx={{ mt: 1, mb: 2 }}>
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "200px",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </Box>
-                )}
-              </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
+                  fullWidth
                   label="Category"
                   value={currentArticle.category}
                   onChange={(e) =>
@@ -338,17 +388,16 @@ function DashArticleListPage() {
                       category: e.target.value,
                     })
                   }
-                  fullWidth
-                  size="small"
-                  sx={{ mb: 1, background: "#fff" }}
                   required
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+                <FormControl fullWidth>
                   <InputLabel>Status</InputLabel>
                   <Select
                     value={currentArticle.status}
+                    label="Status"
                     onChange={(e) =>
                       setCurrentArticle({
                         ...currentArticle,
@@ -362,46 +411,80 @@ function DashArticleListPage() {
                   </Select>
                 </FormControl>
               </Grid>
+
               <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  sx={{
-                    width: "100%",
-                    mt: 1,
-                    background:
-                      "linear-gradient(90deg, #4cd964 0%, #5ac8fa 100%)",
-                    color: "#fff",
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    textTransform: "none",
-                    fontSize: 15,
-                    py: 1.2,
-                    "&:hover": {
-                      background:
-                        "linear-gradient(90deg, #5ac8fa 0%, #4cd964 100%)",
-                    },
-                  }}
+                <input
+                  accept="image/*"
+                  type="file"
+                  id="image-upload"
+                  onChange={handleImageChange}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="image-upload">
+                  <Button variant="outlined" component="span" sx={{ mb: 2 }}>
+                    Upload Image
+                  </Button>
+                </label>
+                {previewUrl && (
+                  <Box sx={{ mt: 2 }}>
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "200px",
+                        borderRadius: "4px",
+                      }}
+                    />
+                  </Box>
+                )}
+              </Grid>
+
+              <Grid item xs={12}>
+                <Box
+                  sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}
                 >
-                  Save Article
-                </Button>
+                  <Button
+                    onClick={() => {
+                      setOpen(false);
+                      setPreviewUrl("");
+                      setCurrentArticle(emptyArticle);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    sx={{
+                      background:
+                        "linear-gradient(90deg, #4cd964 0%, #5ac8fa 100%)",
+                    }}
+                  >
+                    {editing ? "Update" : "Create"}
+                  </Button>
+                </Box>
               </Grid>
             </Grid>
           </form>
         </Box>
       </Modal>
 
-      {}
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       >
-        <DialogTitle>Delete Article</DialogTitle>
+        <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete this article?
+          <Typography>
+            Are you sure you want to delete this article? This action cannot be
+            undone.
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete}>
+          <Button onClick={handleDelete} color="error">
             Delete
           </Button>
         </DialogActions>

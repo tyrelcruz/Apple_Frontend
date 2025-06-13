@@ -1,124 +1,342 @@
-import React from "react";
-import { Card, CardContent, Typography, Grid } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import {
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import "../../styles/DashboardPage.css";
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Paper,
+  Button,
+} from "@mui/material";
+import {
+  BarChart as BarChartIcon,
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Article as ArticleIcon,
+  List as ListIcon,
+} from "@mui/icons-material";
+import { fetchArticles } from "../../services/ArticleService";
 
-const trendData = [
-  { name: "Jan", uv: 4000, pv: 2400, amt: 2400 },
-  { name: "Feb", uv: 3000, pv: 1398, amt: 2210 },
-  { name: "Mar", uv: 2000, pv: 9800, amt: 2290 },
-  { name: "Apr", uv: 2780, pv: 3908, amt: 2000 },
-  { name: "May", uv: 1890, pv: 4800, amt: 2181 },
-  { name: "Jun", uv: 2390, pv: 3800, amt: 2500 },
-  { name: "Jul", uv: 3490, pv: 4300, amt: 2100 },
-];
+function DashboardPage() {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-const DashboardPage = () => {
+  useEffect(() => {
+    loadArticles();
+  }, []);
+
+  const loadArticles = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchArticles();
+      if (Array.isArray(data)) {
+        setArticles(data);
+      } else {
+        console.error("Received non-array data:", data);
+        setArticles([]);
+      }
+    } catch (err) {
+      console.error("Error loading articles:", err);
+      setError("Failed to load articles");
+      setArticles([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Dashboard stats
+  const stats = {
+    totalArticles: articles.length,
+    publishedArticles: articles.filter((a) => a.status === "published").length,
+    draftArticles: articles.filter((a) => a.status === "draft").length,
+    categories: [...new Set(articles.map((a) => a.category))].length,
+  };
+
   return (
-    <div className="dashboard-container">
-      <div className="overview-container">
-        <Grid container spacing={4}>
-          <Grid item xs={12} sm={3}>
-            <Card className="dashboard-card">
+    <Box sx={{ p: 3 }}>
+      {/* Dashboard Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
+          Dashboard Overview
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          Welcome to your content management dashboard
+        </Typography>
+      </Box>
+
+      {/* Quick Stats Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <BarChartIcon /> Quick Stats
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card
+              sx={{
+                height: "100%",
+                background: "linear-gradient(45deg, #4cd964 30%, #5ac8fa 90%)",
+                color: "white",
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" className="card-title">
-                  Unique Viewers
-                </Typography>
-                <Typography variant="h4" className="card-value">
-                  18.97%
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  className="card-change negative"
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  -18.97% Compared to previous period
-                </Typography>
-                <div className="chart-placeholder">
-                  <ResponsiveContainer width="100%" height={150}>
-                    <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="uv" stroke="#8884d8" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                  <Box>
+                    <Typography variant="h6">Total Articles</Typography>
+                    <Typography variant="h4">{stats.totalArticles}</Typography>
+                  </Box>
+                  <ArticleIcon sx={{ fontSize: 40, opacity: 0.8 }} />
+                </Box>
               </CardContent>
             </Card>
           </Grid>
-
-          <Grid item xs={12} sm={3}>
-            <Card className="dashboard-card">
+          <Grid item xs={12} sm={6} md={3}>
+            <Card
+              sx={{
+                height: "100%",
+                background: "linear-gradient(45deg, #007AFF 30%, #5856D6 90%)",
+                color: "white",
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" className="card-title">
-                  Total Views
-                </Typography>
-                <Typography variant="h4" className="card-value">
-                  22.35%
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  className="card-change positive"
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  +22.35% Compared to previous period
-                </Typography>
-                <div className="chart-placeholder">
-                  <ResponsiveContainer width="100%" height={150}>
-                    <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="pv" stroke="#34c759" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                  <Box>
+                    <Typography variant="h6">Published</Typography>
+                    <Typography variant="h4">
+                      {stats.publishedArticles}
+                    </Typography>
+                  </Box>
+                  <VisibilityIcon sx={{ fontSize: 40, opacity: 0.8 }} />
+                </Box>
               </CardContent>
             </Card>
           </Grid>
-
-          <Grid item xs={12} sm={3}>
-            <Card className="dashboard-card">
+          <Grid item xs={12} sm={6} md={3}>
+            <Card
+              sx={{
+                height: "100%",
+                background: "linear-gradient(45deg, #FF9500 30%, #FF2D55 90%)",
+                color: "white",
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" className="card-title">
-                  Average Active Time
-                </Typography>
-                <Typography variant="h4" className="card-value">
-                  28.13%
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  className="card-change negative"
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  -28.13% Compared to previous period
-                </Typography>
-                <div className="chart-placeholder">
-                  <ResponsiveContainer width="100%" height={150}>
-                    <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="amt" stroke="#ff9500" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                  <Box>
+                    <Typography variant="h6">Drafts</Typography>
+                    <Typography variant="h4">{stats.draftArticles}</Typography>
+                  </Box>
+                  <EditIcon sx={{ fontSize: 40, opacity: 0.8 }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card
+              sx={{
+                height: "100%",
+                background: "linear-gradient(45deg, #5856D6 30%, #FF2D55 90%)",
+                color: "white",
+              }}
+            >
+              <CardContent>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box>
+                    <Typography variant="h6">Categories</Typography>
+                    <Typography variant="h4">{stats.categories}</Typography>
+                  </Box>
+                  <BarChartIcon sx={{ fontSize: 40, opacity: 0.8 }} />
+                </Box>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
-      </div>
-    </div>
+      </Box>
+
+      {/* Content Management Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <ArticleIcon /> Content Management
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography variant="subtitle1" color="text.secondary">
+            Recent Articles
+          </Typography>
+          <Button
+            href="/dashboard/articles"
+            sx={{
+              background: "linear-gradient(90deg, #4cd964 0%, #5ac8fa 100%)",
+              color: "#fff",
+              borderRadius: 2,
+              fontWeight: 600,
+              textTransform: "none",
+              px: 3,
+            }}
+          >
+            View All Articles
+          </Button>
+        </Box>
+        <Paper sx={{ p: 2, borderRadius: 3 }}>
+          {loading ? (
+            <Typography>Loading articles...</Typography>
+          ) : error ? (
+            <Typography color="error">{error}</Typography>
+          ) : articles.length === 0 ? (
+            <Typography>No articles found.</Typography>
+          ) : (
+            <Box>
+              {articles.slice(0, 5).map((article) => (
+                <Box
+                  key={article._id}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    py: 1,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    "&:last-child": { borderBottom: "none" },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      bgcolor:
+                        article.status === "published"
+                          ? "#4cd964"
+                          : article.status === "draft"
+                            ? "#FF9500"
+                            : "#FF2D55",
+                      mr: 2,
+                    }}
+                  />
+                  <Typography variant="body2">{article.title}</Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ ml: "auto" }}
+                  >
+                    {new Date(article.createdAt).toLocaleDateString()}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Paper>
+      </Box>
+
+      {/* Activity Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <ListIcon /> Recent Activity
+        </Typography>
+        <Paper sx={{ p: 2, borderRadius: 3 }}>
+          <Typography variant="body2" color="text.secondary">
+            Last 5 actions:
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            {articles.slice(0, 5).map((article) => (
+              <Box
+                key={article._id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  py: 1,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                  "&:last-child": { borderBottom: "none" },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    bgcolor:
+                      article.status === "published"
+                        ? "#4cd964"
+                        : article.status === "draft"
+                          ? "#FF9500"
+                          : "#FF2D55",
+                    mr: 2,
+                  }}
+                />
+                <Typography variant="body2">
+                  {article.title} was{" "}
+                  {article.status === "published" ? "published" : "updated"}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ ml: "auto" }}
+                >
+                  {new Date(article.createdAt).toLocaleDateString()}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
-};
+}
 
 export default DashboardPage;
