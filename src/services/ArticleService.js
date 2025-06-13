@@ -1,10 +1,7 @@
 import axios from "axios";
 import constants from "../../constants";
 
-const baseURL =
-  import.meta.env.VITE_MODE === "development"
-    ? import.meta.env.VITE_API_URL + "/api/articles" // Always use the hosted backend in development
-    : import.meta.env.VITE_API_URL + "/api/articles";
+const baseURL = import.meta.env.VITE_API_URL + "/api/articles";
 
 console.log("Environment:", import.meta.env.VITE_MODE);
 console.log("API URL:", baseURL);
@@ -17,6 +14,11 @@ const api = axios.create({
     Accept: "application/json",
     "X-Requested-With": "XMLHttpRequest",
   },
+  // Add these options for CORS
+  crossDomain: true,
+  xhrFields: {
+    withCredentials: true,
+  },
 });
 
 // Add auth token to requests
@@ -26,10 +28,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Ensure credentials are included
+    config.withCredentials = true;
     console.log("Request config:", {
       url: config.url,
       method: config.method,
       headers: config.headers,
+      withCredentials: config.withCredentials,
     });
     return config;
   },
@@ -49,6 +54,7 @@ api.interceptors.response.use(
     if (error.response) {
       console.error("API Error:", error.response.data);
       console.error("Status:", error.response.status);
+      console.error("Headers:", error.response.headers);
     } else if (error.request) {
       console.error("No response received:", error.request);
     } else {
@@ -65,7 +71,14 @@ export const fetchArticles = async () => {
     const token = localStorage.getItem("token");
     console.log("Auth token present:", !!token);
 
-    const response = await api.get("/");
+    const response = await api.get("/", {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    });
     console.log("Articles response:", response.data);
     return response.data;
   } catch (error) {
@@ -73,6 +86,7 @@ export const fetchArticles = async () => {
     if (error.response) {
       console.error("Error response:", error.response.data);
       console.error("Error status:", error.response.status);
+      console.error("Error headers:", error.response.headers);
     }
     throw error;
   }
