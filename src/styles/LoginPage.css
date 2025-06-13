@@ -1,0 +1,119 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #f5f5f7;
+}
+
+.login-box {
+  background: white;
+  padding: 60px 40px;
+  border-radius: 18px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 480px;
+  margin: 20px auto;
+}
+
+.login-box .apple-logo {
+  width: 250px;
+  height: auto;
+  margin: 0 auto 24px;
+  display: block;
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 32px;
+  color: #1d1d1f;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 16px 20px 16px 30px;
+  margin-bottom: 16px;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+  background: #ffffff;
+}
+
+.input-field::placeholder {
+  color: #86868b;
+}
+
+.keep-signed-in {
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  font-size: 14px;
+}
+
+.keep-signed-in input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #0077ed;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.login-link {
+  color: #0071e3;
+  text-decoration: none;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+}

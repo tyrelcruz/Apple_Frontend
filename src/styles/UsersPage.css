@@ -1,0 +1,28 @@
+.users-container {
+  min-height: 100vh;
+  padding: 24px;
+  position: relative;
+  font-family:
+    SF Pro Display,
+    Helvetica Neue,
+    Arial,
+    sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.users-table-container {
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+}
+
+.MuiTypography-root {
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.MuiPaper-root {
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}

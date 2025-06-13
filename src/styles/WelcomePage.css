@@ -1,0 +1,39 @@
+.homepage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.apple-video {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 16px;
+  opacity: 0.9;
+  mix-blend-mode: lighten;
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.578);
+  background-color: transparent;
+}
+
+.homepage-title {
+  margin-top: 24px;
+  font-size: 24px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: #1d1d1f;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root,
+.homepage {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}

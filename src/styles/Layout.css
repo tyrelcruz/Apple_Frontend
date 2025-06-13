@@ -1,0 +1,28 @@
+/* Add these to your existing Layout.css */
+.layout-container.auth-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-background {
+  flex: 1;
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  display: none; /* Hide on mobile */
+}
+
+.auth-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+@media (min-width: 768px) {
+  .auth-background {
+    display: block;
+  }
+  .auth-content {
+    flex: 0 0 50%;
+  }
+}

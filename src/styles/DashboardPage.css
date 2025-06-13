@@ -1,0 +1,71 @@
+.dashboard-container {
+  padding: 40px;
+}
+
+.apple-header3 {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin: 2rem 0;
+  width: 100%;
+  justify-content: start;
+}
+
+.apple-logo-2 {
+  height: 40px;
+}
+
+.dashboard-title {
+  flex: 5;
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+}
+.overview-container {
+  display: flex;
+}
+.dashboard-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.card-title {
+  font-size: 16px;
+  color: #555;
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #000;
+}
+
+.card-change {
+  font-size: 14px;
+}
+
+.card-change.positive {
+  color: green;
+}
+
+.card-change.negative {
+  color: red;
+}
+
+.chart-placeholder {
+  height: 150px;
+  background: #f5f5f5; /* Placeholder for the chart */
+}
+
+@media (max-width: 768px) {
+  .dashboard-title {
+    font-size: 24px;
+  }
+
+  .dashboard-card {
+    margin-bottom: 15px;
+  }
+}

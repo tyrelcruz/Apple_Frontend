@@ -1,0 +1,46 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 40px;
+  background-color: #f8f8f8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+body,
+.navbar {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.logo-img {
+  width: 22px;
+  height: 28px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 40px;
+  font-weight: 500;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: #1d1d1f;
+  font-size: 15px;
+  transition: opacity 0.2s ease;
+  opacity: 0.8;
+}
+
+.nav-links li a:hover {
+  opacity: 1;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
