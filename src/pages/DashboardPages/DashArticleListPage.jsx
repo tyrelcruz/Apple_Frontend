@@ -58,9 +58,10 @@ function DashArticleListPage() {
   const loadArticles = async () => {
     setLoading(true);
     try {
-      const res = await fetchArticles();
-      setArticles(res.data);
+      const data = await fetchArticles();
+      setArticles(data || []);
     } catch (err) {
+      console.error("Error loading articles:", err);
       setError("Failed to load articles");
     } finally {
       setLoading(false);

@@ -3,10 +3,11 @@ import constants from "../../constants";
 
 const baseURL =
   import.meta.env.VITE_MODE === "development"
-    ? import.meta.env.VITE_LOCAL_HOST + "/api/articles"
+    ? import.meta.env.VITE_API_URL + "/api/articles" // Always use the hosted backend in development
     : import.meta.env.VITE_API_URL + "/api/articles";
 
-console.log("Current API URL:", baseURL); // Debug log
+console.log("Environment:", import.meta.env.VITE_MODE);
+console.log("API URL:", baseURL);
 
 const api = axios.create({
   baseURL,
@@ -16,8 +17,6 @@ const api = axios.create({
     Accept: "application/json",
     "X-Requested-With": "XMLHttpRequest",
   },
-  // Add CORS configuration
-  crossDomain: true,
 });
 
 // Add auth token to requests
@@ -27,6 +26,11 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log("Request config:", {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+    });
     return config;
   },
   (error) => {
@@ -37,10 +41,14 @@ api.interceptors.request.use(
 
 // Add response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("Response:", response.data);
+    return response;
+  },
   (error) => {
     if (error.response) {
       console.error("API Error:", error.response.data);
+      console.error("Status:", error.response.status);
     } else if (error.request) {
       console.error("No response received:", error.request);
     } else {
@@ -53,10 +61,19 @@ api.interceptors.response.use(
 // Fetch all articles
 export const fetchArticles = async () => {
   try {
+    console.log("Fetching articles from:", baseURL);
+    const token = localStorage.getItem("token");
+    console.log("Auth token present:", !!token);
+
     const response = await api.get("/");
+    console.log("Articles response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Fetch Articles Error:", error);
+    if (error.response) {
+      console.error("Error response:", error.response.data);
+      console.error("Error status:", error.response.status);
+    }
     throw error;
   }
 };
